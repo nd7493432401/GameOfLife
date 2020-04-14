@@ -10,6 +10,38 @@ let gui;
 let resetButton;
 let resolutionSlider;
 
+class Cell {
+  constructor(state,health=0) {
+    this.state = state;
+    this.health = health;
+  }
+  getState() {
+    return this.state;
+  }
+  getHealth() {
+    return this.health;
+  }
+  changeHealth(deltaHealth) {
+    this.health += deltaHealth;
+    if(this.health < 0) {
+      this.health = 0;
+    } else if (this.health > 255) {
+      this.health = 255;
+    }
+  }
+  setState(state) {
+    this.state = state;
+  }
+  powerUp() {
+    this.state = 1;
+    this.changeHealth(1);
+  }
+  powerDown() {
+    this.state = 0;
+    this.changeHealth(0);
+  }
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
@@ -31,11 +63,9 @@ function draw() {
     for (let j = 0; j < rows; j++){
       let x = i * resolution + x_offset;
       let y = j * resolution + y_offset;
-      if (cur_state[i][j] == 1) {
-        fill(255);
-        stroke(0);
-        rect(x, y, resolution - 1, resolution - 1);
-      }
+      fill(cur_state[i][j].getHealth(), cur_state[i][j].getState()*255, 0);
+      stroke(0);
+      rect(x, y, resolution - 1, resolution - 1);
     }
   }
 
@@ -69,7 +99,7 @@ function resetState() {
   cur_state  = make2DArray(rows, cols);
   for (let i = 0; i < cols; i++){
     for (let j = 0; j < rows; j++){
-      cur_state[i][j] = floor(random(2));
+      cur_state[i][j] = new Cell(floor(random(2)));
     }
   }
 }
@@ -83,7 +113,9 @@ function make2DArray(rows,cols) {
 }
 
 function stepLife(cur_state) {
-  next_state  = make2DArray(rows, cols);
+  let next_state  = make2DArray(rows, cols);
+  let new_state;
+  let deltaHealth = 0;
   //Loop over all cells
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < rows; j++) {
@@ -95,20 +127,19 @@ function stepLife(cur_state) {
           if(dx === 0 && dy === 0) {
             continue
           }
-          n += cur_state[(cols+i+dx)%cols][(rows+j+dy)%rows];
+          n += cur_state[(cols+i+dx)%cols][(rows+j+dy)%rows].getState();
         }
       }
       
-      state = cur_state[i][j];
+      cell = cur_state[i][j];
+      next_state[i][j] = new Cell(cell.getState(), cell.getHealth());
 
       //Update state according to rule
-      if(state === 0 && n === 3) {
-        next_state[i][j] = 1;
-      } else if(state === 1 && (n < 2 || n > 3)) {
-        next_state[i][j] = 0;
-      } else {
-        next_state[i][j] = state;
-      }
+      if(cell.getState() === 0 && n === 3) {
+        next_state[i][j].powerUp();
+      } else if(cell.getState() === 1 && (n < 2 || n > 3)) {
+        next_state[i][j].powerDown();
+      } 
     }
   }
   return next_state;
