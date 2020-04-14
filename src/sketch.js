@@ -1,10 +1,30 @@
 let grid;
 let cols;
 let rows;
-let resolution = 10;
+let resolution;
+var bgColor = [0, 0, 0];
+let params = {
+
+  // resolution
+  resolution: 10,
+  resolutionMin: 5,
+  resolutionMax: 50,
+
+  bgColor: [0, 0, 0]
+
+};
+// GUI Object
+let gui;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  // create the GUI
+  gui = createGui('slider-range-1');
+  gui.addObject(params);
+
+  resolution = params.resolution;
+
   cols = int(width / resolution);
   rows = int(height / resolution);
 
@@ -17,7 +37,10 @@ function setup() {
 }
 
 function draw() {
-  background(0);
+  resolution = params.resolution;
+  // Set Background Color
+  background(bgColor);
+
   for (let i = 0; i < cols; i++){
     for (let j = 0; j < rows; j++){
       let x = i * resolution;
@@ -71,4 +94,10 @@ function stepLife(cur_state) {
     }
   }
   return next_state;
+}
+
+
+// dynamically adjust the canvas to the window
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
