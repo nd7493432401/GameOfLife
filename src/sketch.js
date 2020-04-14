@@ -1,50 +1,36 @@
 let grid;
 let cols;
 let rows;
+let x_offset = 0;
+let y_offset = 50;
 let resolution;
 var bgColor = [0, 0, 0];
-let params = {
-
-  // resolution
-  resolution: 10,
-  resolutionMin: 5,
-  resolutionMax: 50,
-
-  bgColor: [0, 0, 0]
-
-};
 // GUI Object
 let gui;
+let resetButton;
+let resolutionSlider;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
   // create the GUI
-  gui = createGui('slider-range-1');
-  gui.addObject(params);
+  gui = createGui();
+  resetButton = createButton("Reset", 10,10)
+  resolutionSlider = createSlider("Resolution", 200, 10, 400, 32, 3, 40);
 
-  resolution = params.resolution;
+  resolution = resolutionSlider.val;
 
-  cols = int(width / resolution);
-  rows = int(height / resolution);
-
-  cur_state  = make2DArray(rows, cols);
-  for (let i = 0; i < cols; i++){
-    for (let j = 0; j < rows; j++){
-      cur_state[i][j] = floor(random(2));
-    }
-  }
+  resetState();
 }
 
 function draw() {
-  resolution = params.resolution;
   // Set Background Color
   background(bgColor);
 
   for (let i = 0; i < cols; i++){
     for (let j = 0; j < rows; j++){
-      let x = i * resolution;
-      let y = j * resolution;
+      let x = i * resolution + x_offset;
+      let y = j * resolution + y_offset;
       if (cur_state[i][j] == 1) {
         fill(255);
         stroke(0);
@@ -52,8 +38,40 @@ function draw() {
       }
     }
   }
+
+  noFill();
+  stroke(255);
+  rect(x_offset, y_offset, cols * resolution - 1, rows * resolution - 1);
+
   next_state = stepLife(cur_state);
   cur_state = next_state;
+  drawGui();
+
+  if(resetButton.isPressed) {
+    print(resetButton.label + " is pressed.");
+    resetState();
+  }
+
+  if(resolutionSlider.isChanged) {
+    print(resolutionSlider.label + " = " + resolutionSlider.val );
+    resetState();
+    resolution = resolutionSlider.val;
+  }
+}
+
+function resetState() {
+
+  cols = int((width - x_offset)/ resolution);
+  rows = int((height - y_offset) / resolution);
+  
+  // resolution = resolutionSlider.val - 5;
+
+  cur_state  = make2DArray(rows, cols);
+  for (let i = 0; i < cols; i++){
+    for (let j = 0; j < rows; j++){
+      cur_state[i][j] = floor(random(2));
+    }
+  }
 }
 
 function make2DArray(rows,cols) {
