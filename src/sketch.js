@@ -1,3 +1,38 @@
+let grid;
+let cols;
+let rows;
+let resolution = 5;
+
+function setup() {
+  createCanvas(400,400);
+  cols = width / resolution;
+  rows = height / resolution;
+
+  cur_state  = make2DArray(rows, cols);
+  for (let i = 0; i < cols; i++){
+    for (let j = 0; j < rows; j++){
+      cur_state[i][j] = floor(random(2));
+    }
+  }
+}
+
+function draw() {
+  background(0);
+  for (let i = 0; i < cols; i++){
+    for (let j = 0; j < rows; j++){
+      let x = i * resolution;
+      let y = j * resolution;
+      if (cur_state[i][j] == 1) {
+        fill(255);
+        stroke(0);
+        rect(x, y, resolution - 1, resolution - 1);
+      }
+    }
+  }
+  next_state = stepLife(cur_state);
+  cur_state = next_state;
+}
+
 function make2DArray(rows,cols) {
   let arr = new Array(cols);
   for (let i = 0; i < arr.length; i++) {
@@ -6,7 +41,8 @@ function make2DArray(rows,cols) {
   return arr;
 }
 
-function stepLife(next_state, cur_state) {
+function stepLife(cur_state) {
+  next_state  = make2DArray(rows, cols);
   //Loop over all cells
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < rows; j++) {
@@ -22,48 +58,17 @@ function stepLife(next_state, cur_state) {
         }
       }
       
+      state = cur_state[i][j];
+
       //Update state according to rule
-      if(n === 3 || n === 3 + cur_state[i][j]) {
+      if(state === 0 && n === 3) {
         next_state[i][j] = 1;
-      } else {
+      } else if(state === 1 && (n < 2 || n > 3)) {
         next_state[i][j] = 0;
+      } else {
+        next_state[i][j] = state;
       }
     }
   }
-}
-
-let grid;
-let cols;
-let rows;
-let resolution = 5;
-
-function setup() {
-  createCanvas(600,500);
-  cols = width / resolution;
-  rows = height / resolution;
-
-  state  = make2DArray(rows, cols);
-  next_state  = make2DArray(rows, cols);
-  for (let i = 0; i < cols; i++){
-    for (let j = 0; j < rows; j++){
-      state[i][j] = floor(random(2));
-    }
-  }
-}
-
-function draw() {
-  background(0);
-  for (let i = 0; i < cols; i++){
-    for (let j = 0; j < rows; j++){
-      let x = i * resolution;
-      let y = j * resolution;
-      if (state[i][j] == 1) {
-        fill(255);
-        stroke(0);
-        rect(x, y, resolution - 1, resolution - 1);
-      }
-    }
-  }
-  stepLife(next_state,state);
-  state = next_state;
+  return next_state;
 }
