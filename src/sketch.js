@@ -1,12 +1,12 @@
 let grid;
 let cols;
 let rows;
-let resolution = 5;
+let resolution = 10;
 
 function setup() {
-  createCanvas(400,400);
-  cols = width / resolution;
-  rows = height / resolution;
+  createCanvas(windowWidth, windowHeight);
+  cols = int(width / resolution);
+  rows = int(height / resolution);
 
   cur_state  = make2DArray(rows, cols);
   for (let i = 0; i < cols; i++){
